@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stretch4-flying-gripper-control"
+version = "0.1.0"
+description = "Gamepad control of the Stretch 4 mobile manipulator's gripper"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "numpy",
+    "pin",
+    "yourdfpy"
+]
+
+[tool.setuptools]
+py-modules = [
+    "check_kinematic_chain",
+    "gamepad_mapper",
+    "kinematic_controller",
+    "kinematic_tools",
+    "standalone_gamepad",
+    "stretch_gamepad_teleop_gripper",
+    "teleop_config"
+]
