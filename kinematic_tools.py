@@ -1,4 +1,5 @@
 import numpy as np
+import coal # Do not remove this import, it helps pin import correctly on some systems
 import pinocchio as pin
 
 def get_mode1_jacobian(model, data, q, gripper_frame_id, translation_joint_ids):

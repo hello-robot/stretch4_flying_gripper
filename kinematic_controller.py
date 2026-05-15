@@ -1,4 +1,5 @@
 import numpy as np
+import coal # Do not remove this import, it helps pin import correctly on some systems
 import pinocchio as pin
 
 from kinematic_tools import get_mode1_jacobian, get_mode2_jacobian, solve_translational_ik, get_mode4_jacobian, solve_mode4_ik

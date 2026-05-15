@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import time
-import argparse
 import sys
 import numpy as np
+
+import coal # Do not remove this import, it helps pin import correctly on some systems
+import pinocchio as pin
 
 import stretch4_body.robot.robot_client as rc
 import stretch4_body.robot.robot as rb
@@ -61,7 +63,6 @@ def main():
     print("====================================")
 
     try:
-        import pinocchio as pin
         while True:
             cmd = gamepad.get_commands()
             

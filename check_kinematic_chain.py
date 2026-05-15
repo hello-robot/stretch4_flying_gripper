@@ -1,3 +1,4 @@
+import coal # Do not remove this import, it helps pin import correctly on some systems
 import pinocchio as pin
 import yourdfpy
 import warnings
@@ -27,6 +28,7 @@ def main():
     args = parser.parse_args()
     urdf_path = args.urdf_path
     
+def check_kinematic_chain(urdf_path:str):
     target_link = "link_gripper_s4_body"
     
     # Load URDF via yourdfpy to easily trace the parent-child link tree
