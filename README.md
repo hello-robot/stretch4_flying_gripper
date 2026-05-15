@@ -26,7 +26,7 @@ A similar approach is used when controlling the gripper's yaw angle. As the wris
 **Note: Installation of this repository as a package is NOT necessary to use it.** Simply cloning the repository and installing its dependencies allows you to run `stretch_gamepad_teleop_gripper.py` directly from the command line while in the repository's root directory without any further installation steps.
 
 1. Copy or clone this repository to your Stretch 4 robot.
-2. The core requirements for connecting to the robot (`stretch_body_ii`, `stretch_urdf_ii`) are typically already installed on Stretch 4 systems.
+2. The core requirements for connecting to the robot (`stretch4_body`, `stretch4_urdf`) are typically already installed on Stretch 4 systems.
 3. Install the unmet third-party dependencies (`numpy`, `pinocchio`, `yourdfpy`) using the included installation script:
 ```bash
 ./install_dependencies.sh
@@ -160,8 +160,8 @@ The accuracy of this controller is fundamentally tied to the specialized URDF. W
 
 If an appropriate URDF for your specific robot model does not already exist in the `./urdfs/` directory, you must generate one.
 
-1. Navigate to the Hello Robot official `stretch_urdf_ii` package.
-2. Execute the generator script: [urdf_utils_generate_ik_urdfs.py](https://github.com/hello-robot/stretch_urdf_ii/blob/main/stretch_urdf_ii/urdf_utils_generate_ik_urdfs.py)
+1. Navigate to the Hello Robot official `stretch4_urdf` package.
+2. Execute the generator script: [urdf_utils_generate_ik_urdfs.py](https://github.com/hello-robot/stretch4_urdf/blob/main/stretch4_urdf/urdf_utils_generate_ik_urdfs.py)
 3. This script will output several files. Identify the specialized URDF containing the text `base_planar_ik` in its filename.
 4. Copy this file directly into the `./urdfs/` directory of this repository.
 5. **Verify the URDF** by running the internal `check_kinematic_chain.py` tool. You can pass your URDF path to see if your chain differs physically or structurally from other officially tested kinematic chains:

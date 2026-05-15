@@ -1,9 +1,9 @@
 import argparse
 import sys
 
-import stretch_body_ii.robot.robot_client as rc
-import stretch_body_ii.robot.robot as rb
-from stretch_body_ii.core.robot_params import RobotParams
+import stretch4_body.robot.robot_client as rc
+import stretch4_body.robot.robot as rb
+from stretch4_body.core.robot_params import RobotParams
 from kinematic_controller import KinematicController
 
 def get_base_parser(description):
