@@ -31,7 +31,7 @@ class KinematicController:
         self.data = self.model.createData()
         self.q = pin.neutral(self.model)
         
-        self.translation_joints = ["mobile_base_planar_joint", "lift_joint", "arm_l0_joint"]
+        self.translation_joints = ["mobile_base_planar_joint", "lift_joint", "arm_l4_joint"]
         self.trans_jids = [self.model.getJointId(n) for n in self.translation_joints if self.model.existJointName(n)]
         
         self.rotation_joints = ["wrist_yaw_joint", "wrist_pitch_joint", "wrist_roll_joint"]
@@ -214,7 +214,7 @@ class KinematicController:
                     upper = self.model.upperPositionLimit[idx_q]
                     
                     if control_mode == 4:
-                        if self.model.names[j_id] == "arm_l0_joint":
+                        if self.model.names[j_id] == "arm_l4_joint":
                             upper = min(upper, self.mode4_max_arm_extension)
 
                     self.q[idx_q] = np.clip(self.q[idx_q], lower, upper)

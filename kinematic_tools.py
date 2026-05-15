@@ -137,9 +137,9 @@ def solve_translational_ik(model, q, v_desired, J, translation_joint_ids, arm_bl
         # We assume order is Base(nv=3), then Lift, then Arm. That maps to Base=0,1,2; Lift=3; Arm=4
         name = model.names[j_id]
         
-        if name in ["lift_joint", "arm_l0_joint"]:
+        if name in ["lift_joint", "arm_l4_joint"]:
             col = 3 if name == "lift_joint" else 4
-            if name == "arm_l0_joint":
+            if name == "arm_l4_joint":
                 margin_lower = arm_blend_margin_retraction
                 margin_upper = arm_blend_margin_extension
             else:
@@ -151,7 +151,7 @@ def solve_translational_ik(model, q, v_desired, J, translation_joint_ids, arm_bl
             lower = model.lowerPositionLimit[idx_q]
             upper = model.upperPositionLimit[idx_q]
             
-            if name == "arm_l0_joint":
+            if name == "arm_l4_joint":
                 arm_col = col
                 arm_val = val
                 arm_upper = upper
@@ -163,7 +163,7 @@ def solve_translational_ik(model, q, v_desired, J, translation_joint_ids, arm_bl
                 interpolation_ratio = np.clip(((lower + margin_lower) - val) / margin_lower, 0.0, 1.0)
             elif val >= upper - margin_upper and v_5dof[col] > 0:
                 interpolation_ratio = np.clip((val - (upper - margin_upper)) / margin_upper, 0.0, 1.0)
-                if name == "arm_l0_joint":
+                if name == "arm_l4_joint":
                     interpolation_ratio = interpolation_ratio ** arm_blend_power_extension
                 
             if interpolation_ratio > 0.0:

@@ -6,10 +6,6 @@ import numpy as np
 import coal # Do not remove this import, it helps pin import correctly on some systems
 import pinocchio as pin
 
-import stretch4_body.robot.robot_client as rc
-import stretch4_body.robot.robot as rb
-from stretch4_body.core.robot_params import RobotParams
-
 from gamepad_mapper import GamepadMapper
 # Kinematic resolution handled dynamically in teleop_config.py
 import teleop_config
@@ -115,6 +111,7 @@ def main():
             left_trigger = cmd.get('left_trigger', 0.0)
             speed_multiplier = 1.0 - (0.5 * left_trigger)
 
+
             if control_mode == 3:
                 # Direct joint space mapping ignoring kinematics solver
                 v_vel = np.zeros(8)
@@ -149,6 +146,7 @@ def main():
                     v_vel[4] = cmd['rot_change'][1] * gamepad_speed_trans * speed_multiplier
                 
                 v = v_vel * dt
+
                 
             else:
                 v_desired = np.array(cmd['v_desired']) * gamepad_speed_trans * speed_multiplier * dt
@@ -160,7 +158,7 @@ def main():
                 # Scale from displacement `v` back to continuous velocity by dividing by `dt`
                 v_vel = v / dt
                 
-            if np.any(v != 0):
+            if np.any(v != 0):         
                 # Command actual hardware
                 robot.base.set_velocity(v_vel[0], v_vel[1], v_vel[2], a_m=accel_base_xy, a_r=accel_base_w)
                 robot.lift.set_velocity(v_vel[3], a_m=accel_lift)
