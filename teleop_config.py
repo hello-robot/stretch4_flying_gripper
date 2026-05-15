@@ -39,7 +39,7 @@ def get_base_parser(description):
     parser.add_argument("--mode4_max_arm_extension", type=float, default=0.48, help="Maximum allowed extension (meters) for the telescoping arm when using Control Mode 4. Limits the reach to prevent over-extension or to maintain stability.")
     return parser
 
-def initialize_teleop_hardware(args):
+def initialize_teleop_hardware(args, check_urdf_valid:bool = False):
     speed_mapping = {
         'low': 'slow',
         'medium': 'default',
@@ -94,9 +94,9 @@ def initialize_teleop_hardware(args):
         accel_vel_dict['gamepad_speed_rot'] = 1.0
 
     print("Initializing IK Controller...")
-
-    # if not check_kinematic_chain(args.urdf):
-    #     raise ValueError(f"Generated URDF {args.urdf} has an incorrect kinematic chain")
+    
+    if check_urdf_valid and not check_kinematic_chain(args.urdf):
+        raise ValueError(f"Generated URDF {args.urdf} has an incorrect kinematic chain")
 
     try:
         ikin = KinematicController(
@@ -121,4 +121,4 @@ def initialize_teleop_hardware(args):
 if __name__ == '__main__':
     parser = get_base_parser('Gripper-centric Teleop for Stretch')
     args = parser.parse_args()
-    robot, ikin, accel_vel_dict = initialize_teleop_hardware(args)
+    robot, ikin, accel_vel_dict = initialize_teleop_hardware(args, check_urdf_valid=True)
