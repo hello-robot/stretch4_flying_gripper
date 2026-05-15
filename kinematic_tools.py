@@ -137,9 +137,9 @@ def solve_translational_ik(model, q, v_desired, J, translation_joint_ids, arm_bl
         # We assume order is Base(nv=3), then Lift, then Arm. That maps to Base=0,1,2; Lift=3; Arm=4
         name = model.names[j_id]
         
-        if name in ["joint_lift", "joint_arm_l0"]:
-            col = 3 if name == "joint_lift" else 4
-            if name == "joint_arm_l0":
+        if name in ["lift_joint", "arm_l0_joint"]:
+            col = 3 if name == "lift_joint" else 4
+            if name == "arm_l0_joint":
                 margin_lower = arm_blend_margin_retraction
                 margin_upper = arm_blend_margin_extension
             else:
@@ -151,7 +151,7 @@ def solve_translational_ik(model, q, v_desired, J, translation_joint_ids, arm_bl
             lower = model.lowerPositionLimit[idx_q]
             upper = model.upperPositionLimit[idx_q]
             
-            if name == "joint_arm_l0":
+            if name == "arm_l0_joint":
                 arm_col = col
                 arm_val = val
                 arm_upper = upper
@@ -163,7 +163,7 @@ def solve_translational_ik(model, q, v_desired, J, translation_joint_ids, arm_bl
                 interpolation_ratio = np.clip(((lower + margin_lower) - val) / margin_lower, 0.0, 1.0)
             elif val >= upper - margin_upper and v_5dof[col] > 0:
                 interpolation_ratio = np.clip((val - (upper - margin_upper)) / margin_upper, 0.0, 1.0)
-                if name == "joint_arm_l0":
+                if name == "arm_l0_joint":
                     interpolation_ratio = interpolation_ratio ** arm_blend_power_extension
                 
             if interpolation_ratio > 0.0:
@@ -234,11 +234,11 @@ def get_mode4_jacobian(model, data, q, grasp_center_frame_id, base_frame_id, mod
         idx_v = model.joints[j_id].idx_v
         nv = model.joints[j_id].nv
         
-        if name == "joint_mobile_base_planar":
+        if name == "mobile_base_planar_joint":
             # Zero out Base X and Base Y
             J_mode4_full[:, idx_v] = 0.0
             J_mode4_full[:, idx_v+1] = 0.0
-        elif name in ["joint_wrist_yaw", "joint_wrist_pitch", "joint_wrist_roll"]:
+        elif name in ["wrist_yaw_joint", "wrist_pitch_joint", "wrist_roll_joint"]:
             for col in range(idx_v, idx_v + nv):
                 J_mode4_full[:, col] = 0.0
     
