@@ -8,6 +8,7 @@ import difflib
 STANDARD_CHAINS = {
     "Stretch Test Standard": [
         {"link": "virtual_base", "joint": "mobile_base_planar_joint", "type": "planar", "actuated": True, "dofs": 3},
+        {"link": "base_footprint", "joint": "base_ref", "type": "fixed", "actuated": False, "dofs": 0},
         {"link": "base_link", "joint": "mast_joint", "type": "fixed", "actuated": False, "dofs": 0},
         {"link": "mast_link", "joint": "lift_joint", "type": "prismatic", "actuated": True, "dofs": 1},
         {"link": "lift_link", "joint": "arm_l0_joint", "type": "fixed", "actuated": False, "dofs": 0},
@@ -17,7 +18,7 @@ STANDARD_CHAINS = {
         {"link": "wrist_yaw_link", "joint": "wrist_pitch_joint", "type": "revolute", "actuated": True, "dofs": 1},
         {"link": "wrist_pitch_link", "joint": "wrist_roll_joint", "type": "revolute", "actuated": True, "dofs": 1},
         {"link": "wrist_roll_link", "joint": "tool_attachment_site_joint", "type": "fixed", "actuated": False, "dofs": 0},
-        {"link": "tool_attachment_site_link", "joint": "gripper_to_wrist_joint", "type": "fixed", "actuated": False, "dofs": 0},
+        {"link": "tool_attachment_site_link", "joint": "tool_connection_joint", "type": "fixed", "actuated": False, "dofs": 0},
         {"link": "quick_connect_interface_link", "joint": None, "type": None, "actuated": None, "dofs": None}
     ]
 }
@@ -30,7 +31,7 @@ def main():
 
     check_kinematic_chain(urdf_path)
     
-def check_kinematic_chain(urdf_path:str):
+def check_kinematic_chain(urdf_path:str, verbose:bool=True):
     target_link = "quick_connect_interface_link"
     
     # Load URDF via yourdfpy to easily trace the parent-child link tree
