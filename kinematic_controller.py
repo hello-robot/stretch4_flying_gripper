@@ -46,7 +46,7 @@ class KinematicController:
             self.model.upperPositionLimit[idx_q] = min(upper, limit)
             self.model.lowerPositionLimit[idx_q] = max(lower, -limit)
         
-        self.gripper_frame_id = self.model.getFrameId("gripper_s4_body_link")
+        self.gripper_frame_id = self.model.getFrameId("quick_connect_interface_link")
         self.base_frame_id = self.model.getFrameId("base_link")
         
         if self.model.existFrame("grasp_center_link"):

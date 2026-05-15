@@ -18,7 +18,7 @@ STANDARD_CHAINS = {
         {"link": "wrist_pitch_link", "joint": "wrist_roll_joint", "type": "revolute", "actuated": True, "dofs": 1},
         {"link": "wrist_roll_link", "joint": "tool_attachment_site_joint", "type": "fixed", "actuated": False, "dofs": 0},
         {"link": "tool_attachment_site_link", "joint": "gripper_to_wrist_joint", "type": "fixed", "actuated": False, "dofs": 0},
-        {"link": "gripper_s4_body_link", "joint": None, "type": None, "actuated": None, "dofs": None}
+        {"link": "quick_connect_interface_link", "joint": None, "type": None, "actuated": None, "dofs": None}
     ]
 }
 
@@ -31,7 +31,7 @@ def main():
     check_kinematic_chain(urdf_path)
     
 def check_kinematic_chain(urdf_path:str):
-    target_link = "gripper_s4_body_link"
+    target_link = "quick_connect_interface_link"
     
     # Load URDF via yourdfpy to easily trace the parent-child link tree
     with warnings.catch_warnings():
