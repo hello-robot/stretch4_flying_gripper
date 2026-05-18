@@ -67,7 +67,7 @@ def main():
                 
             # Sync IK configuration with real robot
             pitch_sign_mult = 1.0 if args.disable_flipped_wrist else -1.0
-            roll_sign_mult = 1.0 if args.disable_flipped_wrist else -1.0
+            roll_sign_mult = -1.0 if args.disable_flipped_wrist else 1.0
             
             ikin.q[0] = robot.base.status['x']
             ikin.q[1] = robot.base.status['y']
@@ -163,9 +163,6 @@ def main():
                 robot.base.set_velocity(v_vel[0], v_vel[1], v_vel[2], a_m=accel_base_xy, a_r=accel_base_w)
                 robot.lift.set_velocity(v_vel[3], a_m=accel_lift)
                 robot.arm.set_velocity(v_vel[4], a_m=accel_arm)
-                
-                pitch_sign_mult = 1.0 if args.disable_flipped_wrist else -1.0
-                roll_sign_mult = 1.0 if args.disable_flipped_wrist else -1.0
                 
                 # Smoothing move_by control commands using a high lookahead targeting horizon
                 # and reduced acceleration to seamlessly simulate velocity tracking without stopping abruptly
