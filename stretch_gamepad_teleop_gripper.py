@@ -76,8 +76,8 @@ def main():
             ikin.q[4] = robot.lift.status['pos']
             ikin.q[5] = robot.arm.status['pos']
             ikin.q[6] = robot.end_of_arm.status['wrist_yaw']['pos']
-            ikin.q[7] = robot.end_of_arm.status['wrist_pitch']['pos'] * pitch_sign_mult
-            ikin.q[8] = robot.end_of_arm.status['wrist_roll']['pos'] * roll_sign_mult
+            ikin.q[7] = robot.end_of_arm.status['wrist_pitch']['pos'] 
+            ikin.q[8] = robot.end_of_arm.status['wrist_roll']['pos']
             
             pin.forwardKinematics(ikin.model, ikin.data, ikin.q)
             pin.updateFramePlacements(ikin.model, ikin.data)
@@ -124,11 +124,11 @@ def main():
                     # Arm Extend/Retract (Left Stick Y) overrides Base Forward/Backward
                     v_vel[4] = cmd['v_desired'][0] * gamepad_speed_trans * speed_multiplier
                     
-                    # Wrist Roll (Left Stick X) - Flipped to match intuitive rotation
-                    v_vel[7] = -cmd['v_desired'][1] * gamepad_speed_rot * speed_multiplier
+                    # Wrist Roll (Left Stick X)
+                    v_vel[7] = cmd['v_desired'][1] * gamepad_speed_rot * speed_multiplier * roll_sign_mult
                     
                     # Wrist Pitch (Right Stick Y)
-                    v_vel[6] = cmd['rot_change'][1] * gamepad_speed_rot * speed_multiplier
+                    v_vel[6] = cmd['rot_change'][1] * gamepad_speed_rot * speed_multiplier *  pitch_sign_mult
                     
                     # Wrist Yaw (Right Stick X)
                     v_vel[5] = cmd['rot_change'][0] * gamepad_speed_rot * speed_multiplier
