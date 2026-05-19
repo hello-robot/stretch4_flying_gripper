@@ -125,10 +125,10 @@ def main():
                     v_vel[4] = cmd['v_desired'][0] * gamepad_speed_trans * speed_multiplier
                     
                     # Wrist Roll (Left Stick X)
-                    v_vel[7] = cmd['v_desired'][1] * gamepad_speed_rot * speed_multiplier * roll_sign_mult
+                    v_vel[7] = cmd['v_desired'][1] * gamepad_speed_rot * speed_multiplier * roll_sign_mult * -1
                     
                     # Wrist Pitch (Right Stick Y)
-                    v_vel[6] = cmd['rot_change'][1] * gamepad_speed_rot * speed_multiplier *  pitch_sign_mult
+                    v_vel[6] = cmd['rot_change'][1] * gamepad_speed_rot * speed_multiplier * pitch_sign_mult * -1
                     
                     # Wrist Yaw (Right Stick X)
                     v_vel[5] = cmd['rot_change'][0] * gamepad_speed_rot * speed_multiplier
