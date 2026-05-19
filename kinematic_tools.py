@@ -8,8 +8,8 @@ def get_mode1_jacobian(model, data, q, gripper_frame_id, translation_joint_ids):
     velocity of the gripper expressed in its own frame (Mode 1).
     
     Mode 1 Control:
-    - forward => gripper -Y-axis
-    - left => gripper X-axis
+    - forward => gripper X-axis
+    - left => gripper Y-axis
     - up => gripper Z-axis
     
     Returns:
@@ -19,9 +19,9 @@ def get_mode1_jacobian(model, data, q, gripper_frame_id, translation_joint_ids):
     J_full = pin.computeFrameJacobian(model, data, q, gripper_frame_id, pin.ReferenceFrame.LOCAL)
     
     # Extract linear velocity components
-    # Local axes (new URDF quick_connect_interface_link): X (left), Y (backward), Z (up)
-    v_left_row = J_full[0, :]
-    v_fwd_row = -J_full[1, :]
+    # Local axes: X (forward), Y (left), Z (up)
+    v_fwd_row = J_full[0, :]
+    v_left_row = J_full[1, :]
     v_up_row = J_full[2, :]
     
     # We want the output vector to align with: [v_forward, v_left, v_up]
@@ -43,8 +43,8 @@ def get_mode2_jacobian(model, data, q, gripper_frame_id, base_frame_id, translat
     in the projected frame (Mode 2).
     
     Mode 2 Control:
-    - forward => projection of gripper's -Y-axis on horizontal plane
-    - left => projection of gripper's X-axis on horizontal plane
+    - forward => projection of gripper's X-axis on horizontal plane
+    - left => projection of gripper's Y-axis on horizontal plane
     - up => base_link's Z-axis
     """
     # Velocity of point at the origin of gripper frame, resolved in WORLD axes
@@ -55,10 +55,10 @@ def get_mode2_jacobian(model, data, q, gripper_frame_id, base_frame_id, translat
     T_gripper = data.oMf[gripper_frame_id]
     R_gripper = T_gripper.rotation
     
-    gripper_left = R_gripper[:, 0] # X axis is left
-    gripper_fwd = -R_gripper[:, 1] # -Y axis is forward
+    gripper_fwd = R_gripper[:, 0]
+    gripper_left = R_gripper[:, 1]
     
-    # Project -Y-axis (forward) onto the horizontal plane (Z=0)
+    # Project X-axis onto the horizontal plane (Z=0)
     fwd_dir = np.copy(gripper_fwd)
     fwd_dir[2] = 0.0
     norm_fwd = np.linalg.norm(fwd_dir)
@@ -67,7 +67,7 @@ def get_mode2_jacobian(model, data, q, gripper_frame_id, base_frame_id, translat
     else:
         fwd_dir = np.array([1.0, 0.0, 0.0])
         
-    # Project X-axis (left) onto the horizontal plane
+    # Project Y-axis onto the horizontal plane
     left_dir = np.copy(gripper_left)
     left_dir[2] = 0.0
     norm_left = np.linalg.norm(left_dir)
