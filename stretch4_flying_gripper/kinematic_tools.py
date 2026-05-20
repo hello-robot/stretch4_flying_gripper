@@ -1,4 +1,5 @@
 import numpy as np
+import coal # Do not remove this import, it helps pin import correctly on some systems
 import pinocchio as pin
 
 def get_mode1_jacobian(model, data, q, gripper_frame_id, translation_joint_ids):
@@ -7,9 +8,9 @@ def get_mode1_jacobian(model, data, q, gripper_frame_id, translation_joint_ids):
     velocity of the gripper expressed in its own frame (Mode 1).
     
     Mode 1 Control:
-    - forward => gripper Z-axis
-    - left => gripper X-axis
-    - up => gripper Y-axis
+    - forward => gripper X-axis
+    - left => gripper Y-axis
+    - up => gripper Z-axis
     
     Returns:
     J_mode1: 3x5 layout [v_forward, v_left, v_up]
@@ -18,10 +19,10 @@ def get_mode1_jacobian(model, data, q, gripper_frame_id, translation_joint_ids):
     J_full = pin.computeFrameJacobian(model, data, q, gripper_frame_id, pin.ReferenceFrame.LOCAL)
     
     # Extract linear velocity components
-    # Local axes: X (left), Y (up), Z (forward)
-    v_left_row = J_full[0, :]
-    v_up_row = J_full[1, :]
-    v_fwd_row = J_full[2, :]
+    # Local axes: X (forward), Y (left), Z (up)
+    v_fwd_row = J_full[0, :]
+    v_left_row = J_full[1, :]
+    v_up_row = J_full[2, :]
     
     # We want the output vector to align with: [v_forward, v_left, v_up]
     J_mode1_full = np.vstack([v_fwd_row, v_left_row, v_up_row])
@@ -42,8 +43,8 @@ def get_mode2_jacobian(model, data, q, gripper_frame_id, base_frame_id, translat
     in the projected frame (Mode 2).
     
     Mode 2 Control:
-    - forward => projection of gripper's Z-axis on horizontal plane
-    - left => projection of gripper's X-axis on horizontal plane
+    - forward => projection of gripper's X-axis on horizontal plane
+    - left => projection of gripper's Y-axis on horizontal plane
     - up => base_link's Z-axis
     """
     # Velocity of point at the origin of gripper frame, resolved in WORLD axes
@@ -54,11 +55,11 @@ def get_mode2_jacobian(model, data, q, gripper_frame_id, base_frame_id, translat
     T_gripper = data.oMf[gripper_frame_id]
     R_gripper = T_gripper.rotation
     
-    gripper_x = R_gripper[:, 0]
-    gripper_z = R_gripper[:, 2]
+    gripper_fwd = R_gripper[:, 0]
+    gripper_left = R_gripper[:, 1]
     
-    # Project Z-axis onto the horizontal plane (Z=0)
-    fwd_dir = np.copy(gripper_z)
+    # Project X-axis onto the horizontal plane (Z=0)
+    fwd_dir = np.copy(gripper_fwd)
     fwd_dir[2] = 0.0
     norm_fwd = np.linalg.norm(fwd_dir)
     if norm_fwd > 1e-6:
@@ -66,8 +67,8 @@ def get_mode2_jacobian(model, data, q, gripper_frame_id, base_frame_id, translat
     else:
         fwd_dir = np.array([1.0, 0.0, 0.0])
         
-    # Project X-axis onto the horizontal plane
-    left_dir = np.copy(gripper_x)
+    # Project Y-axis onto the horizontal plane
+    left_dir = np.copy(gripper_left)
     left_dir[2] = 0.0
     norm_left = np.linalg.norm(left_dir)
     if norm_left > 1e-6:
@@ -136,9 +137,9 @@ def solve_translational_ik(model, q, v_desired, J, translation_joint_ids, arm_bl
         # We assume order is Base(nv=3), then Lift, then Arm. That maps to Base=0,1,2; Lift=3; Arm=4
         name = model.names[j_id]
         
-        if name in ["joint_lift", "joint_arm_l0"]:
-            col = 3 if name == "joint_lift" else 4
-            if name == "joint_arm_l0":
+        if name in ["lift_joint", "arm_l4_joint"]:
+            col = 3 if name == "lift_joint" else 4
+            if name == "arm_l4_joint":
                 margin_lower = arm_blend_margin_retraction
                 margin_upper = arm_blend_margin_extension
             else:
@@ -150,7 +151,7 @@ def solve_translational_ik(model, q, v_desired, J, translation_joint_ids, arm_bl
             lower = model.lowerPositionLimit[idx_q]
             upper = model.upperPositionLimit[idx_q]
             
-            if name == "joint_arm_l0":
+            if name == "arm_l4_joint":
                 arm_col = col
                 arm_val = val
                 arm_upper = upper
@@ -162,7 +163,7 @@ def solve_translational_ik(model, q, v_desired, J, translation_joint_ids, arm_bl
                 interpolation_ratio = np.clip(((lower + margin_lower) - val) / margin_lower, 0.0, 1.0)
             elif val >= upper - margin_upper and v_5dof[col] > 0:
                 interpolation_ratio = np.clip((val - (upper - margin_upper)) / margin_upper, 0.0, 1.0)
-                if name == "joint_arm_l0":
+                if name == "arm_l4_joint":
                     interpolation_ratio = interpolation_ratio ** arm_blend_power_extension
                 
             if interpolation_ratio > 0.0:
@@ -233,11 +234,11 @@ def get_mode4_jacobian(model, data, q, grasp_center_frame_id, base_frame_id, mod
         idx_v = model.joints[j_id].idx_v
         nv = model.joints[j_id].nv
         
-        if name == "joint_mobile_base_planar":
+        if name == "mobile_base_planar_joint":
             # Zero out Base X and Base Y
             J_mode4_full[:, idx_v] = 0.0
             J_mode4_full[:, idx_v+1] = 0.0
-        elif name in ["joint_wrist_yaw", "joint_wrist_pitch", "joint_wrist_roll"]:
+        elif name in ["wrist_yaw_joint", "wrist_pitch_joint", "wrist_roll_joint"]:
             for col in range(idx_v, idx_v + nv):
                 J_mode4_full[:, col] = 0.0
     

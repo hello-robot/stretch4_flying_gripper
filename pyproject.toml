@@ -10,17 +10,11 @@ readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
     "numpy",
+    "coal",
     "pin",
     "yourdfpy"
 ]
 
-[tool.setuptools]
-py-modules = [
-    "check_kinematic_chain",
-    "gamepad_mapper",
-    "kinematic_controller",
-    "kinematic_tools",
-    "standalone_gamepad",
-    "stretch_gamepad_teleop_gripper",
-    "teleop_config"
-]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["stretch4_flying_gripper*"]

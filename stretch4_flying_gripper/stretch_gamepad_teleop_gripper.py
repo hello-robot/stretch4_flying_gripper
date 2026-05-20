@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 import time
-import argparse
 import sys
 import numpy as np
 
-import stretch_body_ii.robot.robot_client as rc
-import stretch_body_ii.robot.robot as rb
-from stretch_body_ii.core.robot_params import RobotParams
+import coal # Do not remove this import, it helps pin import correctly on some systems
+import pinocchio as pin
 
-from gamepad_mapper import GamepadMapper
+from stretch4_flying_gripper.gamepad_mapper import GamepadMapper
 # Kinematic resolution handled dynamically in teleop_config.py
-import teleop_config
+import stretch4_flying_gripper.teleop_config as teleop_config
 
 def main():
     parser = teleop_config.get_base_parser('Gripper-centric Teleop for Stretch')
@@ -55,22 +53,20 @@ def main():
     print("====================================")
     print("Gripper-Centric Teleop Started")
     print("Press Top Button (Y) to Toggle Modes")
-    print("Mode 1: Gripper Frame Relative")
-    print("Mode 2: Projected Base Frame Relative")
+    print("Mode 1: Gripper Frame Relative (IK)")
+    print("Mode 2: Projected Base Frame Relative (IK)")
+    print("Mode 3: Joint-Space Direct Control")
     print("Ctrl+C to Quit")
     print("====================================")
 
     try:
-        import pinocchio as pin
         while True:
             cmd = gamepad.get_commands()
             
             if not args.direct:
                 robot.pull_status()
                 
-            # Sync IK configuration with real robot
-            pitch_sign_mult = 1.0 if args.disable_flipped_wrist else -1.0
-            roll_sign_mult = 1.0 if args.disable_flipped_wrist else -1.0
+            pitch_sign_mult = -1.0 # Flip the pitch so that moving up on the controller moves the pitch up in right-handed config
             
             ikin.q[0] = robot.base.status['x']
             ikin.q[1] = robot.base.status['y']
@@ -79,8 +75,8 @@ def main():
             ikin.q[4] = robot.lift.status['pos']
             ikin.q[5] = robot.arm.status['pos']
             ikin.q[6] = robot.end_of_arm.status['wrist_yaw']['pos']
-            ikin.q[7] = robot.end_of_arm.status['wrist_pitch']['pos'] * pitch_sign_mult
-            ikin.q[8] = robot.end_of_arm.status['wrist_roll']['pos'] * roll_sign_mult
+            ikin.q[7] = robot.end_of_arm.status['wrist_pitch']['pos'] 
+            ikin.q[8] = robot.end_of_arm.status['wrist_roll']['pos']
             
             pin.forwardKinematics(ikin.model, ikin.data, ikin.q)
             pin.updateFramePlacements(ikin.model, ikin.data)
@@ -114,6 +110,7 @@ def main():
             left_trigger = cmd.get('left_trigger', 0.0)
             speed_multiplier = 1.0 - (0.5 * left_trigger)
 
+
             if control_mode == 3:
                 # Direct joint space mapping ignoring kinematics solver
                 v_vel = np.zeros(8)
@@ -126,11 +123,11 @@ def main():
                     # Arm Extend/Retract (Left Stick Y) overrides Base Forward/Backward
                     v_vel[4] = cmd['v_desired'][0] * gamepad_speed_trans * speed_multiplier
                     
-                    # Wrist Roll (Left Stick X) - Flipped to match intuitive rotation
-                    v_vel[7] = -cmd['v_desired'][1] * gamepad_speed_rot * speed_multiplier
+                    # Wrist Roll (Left Stick X)
+                    v_vel[7] = cmd['v_desired'][1] * gamepad_speed_rot * speed_multiplier * -1
                     
                     # Wrist Pitch (Right Stick Y)
-                    v_vel[6] = cmd['rot_change'][1] * gamepad_speed_rot * speed_multiplier
+                    v_vel[6] = cmd['rot_change'][1] * gamepad_speed_rot * speed_multiplier * pitch_sign_mult * -1
                     
                     # Wrist Yaw (Right Stick X)
                     v_vel[5] = cmd['rot_change'][0] * gamepad_speed_rot * speed_multiplier
@@ -148,6 +145,7 @@ def main():
                     v_vel[4] = cmd['rot_change'][1] * gamepad_speed_trans * speed_multiplier
                 
                 v = v_vel * dt
+
                 
             else:
                 v_desired = np.array(cmd['v_desired']) * gamepad_speed_trans * speed_multiplier * dt
@@ -159,14 +157,11 @@ def main():
                 # Scale from displacement `v` back to continuous velocity by dividing by `dt`
                 v_vel = v / dt
                 
-            if np.any(v != 0):
+            if np.any(v != 0):         
                 # Command actual hardware
                 robot.base.set_velocity(v_vel[0], v_vel[1], v_vel[2], a_m=accel_base_xy, a_r=accel_base_w)
                 robot.lift.set_velocity(v_vel[3], a_m=accel_lift)
                 robot.arm.set_velocity(v_vel[4], a_m=accel_arm)
-                
-                pitch_sign_mult = 1.0 if args.disable_flipped_wrist else -1.0
-                roll_sign_mult = 1.0 if args.disable_flipped_wrist else -1.0
                 
                 # Smoothing move_by control commands using a high lookahead targeting horizon
                 # and reduced acceleration to seamlessly simulate velocity tracking without stopping abruptly
@@ -177,7 +172,7 @@ def main():
                 
                 robot.end_of_arm.move_by('wrist_yaw', v[5] * lookahead, v_yaw_cmd, accel_yaw * 0.5)
                 robot.end_of_arm.move_by('wrist_pitch', v[6] * pitch_sign_mult * lookahead, v_pitch_cmd, accel_pitch * 0.5)
-                robot.end_of_arm.move_by('wrist_roll', v[7] * roll_sign_mult * lookahead, v_roll_cmd, accel_roll * 0.5)
+                robot.end_of_arm.move_by('wrist_roll', v[7] * lookahead, v_roll_cmd, accel_roll * 0.5)
             else:
                 robot.base.set_velocity(0, 0, 0, accel_base_xy*2, accel_base_w*2)
                 robot.lift.set_velocity(0, a_m=accel_lift)

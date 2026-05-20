@@ -1,3 +1,4 @@
+import coal # Do not remove this import, it helps pin import correctly on some systems
 import pinocchio as pin
 import yourdfpy
 import warnings
@@ -6,18 +7,19 @@ import difflib
 
 STANDARD_CHAINS = {
     "Stretch Test Standard": [
-        {"link": "virtual_base", "joint": "joint_mobile_base_planar", "type": "planar", "actuated": True, "dofs": 3},
-        {"link": "base_link", "joint": "joint_mast", "type": "fixed", "actuated": False, "dofs": 0},
-        {"link": "link_mast", "joint": "joint_lift", "type": "prismatic", "actuated": True, "dofs": 1},
-        {"link": "link_lift", "joint": "joint_arm_l4", "type": "fixed", "actuated": False, "dofs": 0},
-        {"link": "link_arm_l4", "joint": "joint_arm_l0", "type": "prismatic", "actuated": True, "dofs": 1},
-        {"link": "link_arm_l0", "joint": "joint_wrist", "type": "fixed", "actuated": False, "dofs": 0},
-        {"link": "link_wrist", "joint": "joint_wrist_yaw", "type": "revolute", "actuated": True, "dofs": 1},
-        {"link": "link_wrist_yaw", "joint": "joint_wrist_pitch", "type": "revolute", "actuated": True, "dofs": 1},
-        {"link": "link_wrist_pitch", "joint": "joint_wrist_roll", "type": "revolute", "actuated": True, "dofs": 1},
-        {"link": "link_wrist_roll", "joint": "joint_tool_attachment_site", "type": "fixed", "actuated": False, "dofs": 0},
-        {"link": "link_tool_attachment_site", "joint": "joint_gripper_to_wrist", "type": "fixed", "actuated": False, "dofs": 0},
-        {"link": "link_gripper_s4_body", "joint": None, "type": None, "actuated": None, "dofs": None}
+        {"link": "virtual_base", "joint": "mobile_base_planar_joint", "type": "planar", "actuated": True, "dofs": 3},
+        {"link": "base_footprint", "joint": "base_ref", "type": "fixed", "actuated": False, "dofs": 0},
+        {"link": "base_link", "joint": "mast_joint", "type": "fixed", "actuated": False, "dofs": 0},
+        {"link": "mast_link", "joint": "lift_joint", "type": "prismatic", "actuated": True, "dofs": 1},
+        {"link": "lift_link", "joint": "arm_l0_joint", "type": "fixed", "actuated": False, "dofs": 0},
+        {"link": "arm_l0_link", "joint": "arm_l4_joint", "type": "prismatic", "actuated": True, "dofs": 1},
+        {"link": "arm_l4_link", "joint": "wrist_joint", "type": "fixed", "actuated": False, "dofs": 0},
+        {"link": "wrist_link", "joint": "wrist_yaw_joint", "type": "revolute", "actuated": True, "dofs": 1},
+        {"link": "wrist_yaw_link", "joint": "wrist_pitch_joint", "type": "revolute", "actuated": True, "dofs": 1},
+        {"link": "wrist_pitch_link", "joint": "wrist_roll_joint", "type": "revolute", "actuated": True, "dofs": 1},
+        {"link": "wrist_roll_link", "joint": "tool_attachment_site_joint", "type": "fixed", "actuated": False, "dofs": 0},
+        {"link": "tool_attachment_site_link", "joint": "tool_connection_joint", "type": "fixed", "actuated": False, "dofs": 0},
+        {"link": "quick_connect_interface_link", "joint": None, "type": None, "actuated": None, "dofs": None}
     ]
 }
 
@@ -26,8 +28,11 @@ def main():
     parser.add_argument("urdf_path", help="Path to the URDF file")
     args = parser.parse_args()
     urdf_path = args.urdf_path
+
+    check_kinematic_chain(urdf_path)
     
-    target_link = "link_gripper_s4_body"
+def check_kinematic_chain(urdf_path:str, verbose:bool=True):
+    target_link = "quick_connect_interface_link"
     
     # Load URDF via yourdfpy to easily trace the parent-child link tree
     with warnings.catch_warnings():
@@ -181,6 +186,10 @@ def main():
         for diff in differences:
             print(f"  {diff}")
         print()
+        return False
+    else:
+        print(f"\nSUCCESS: The kinematic chain in {urdf_path} matches the '{best_chain_name}' kinematic chain that has been tested.")
+        return True
 
 if __name__ == "__main__":
 

@@ -1,7 +1,8 @@
 import numpy as np
+import coal # Do not remove this import, it helps pin import correctly on some systems
 import pinocchio as pin
 
-from kinematic_tools import get_mode1_jacobian, get_mode2_jacobian, solve_translational_ik, get_mode4_jacobian, solve_mode4_ik
+from stretch4_flying_gripper.kinematic_tools import get_mode1_jacobian, get_mode2_jacobian, solve_translational_ik, get_mode4_jacobian, solve_mode4_ik
 
 class KinematicController:
     """
@@ -30,10 +31,10 @@ class KinematicController:
         self.data = self.model.createData()
         self.q = pin.neutral(self.model)
         
-        self.translation_joints = ["joint_mobile_base_planar", "joint_lift", "joint_arm_l0"]
+        self.translation_joints = ["mobile_base_planar_joint", "lift_joint", "arm_l4_joint"]
         self.trans_jids = [self.model.getJointId(n) for n in self.translation_joints if self.model.existJointName(n)]
         
-        self.rotation_joints = ["joint_wrist_yaw", "joint_wrist_pitch", "joint_wrist_roll"]
+        self.rotation_joints = ["wrist_yaw_joint", "wrist_pitch_joint", "wrist_roll_joint"]
         self.rot_jids = [self.model.getJointId(n) for n in self.rotation_joints if self.model.existJointName(n)]
         
         if len(self.rot_jids) > 0:
@@ -45,21 +46,21 @@ class KinematicController:
             self.model.upperPositionLimit[idx_q] = min(upper, limit)
             self.model.lowerPositionLimit[idx_q] = max(lower, -limit)
         
-        self.gripper_frame_id = self.model.getFrameId("link_gripper_s4_body")
+        self.gripper_frame_id = self.model.getFrameId("tool_attachment_site_link")
         self.base_frame_id = self.model.getFrameId("base_link")
         
-        if self.model.existFrame("link_grasp_center"):
-            self.grasp_center_frame_id = self.model.getFrameId("link_grasp_center")
+        if self.model.existFrame("grasp_center_link"):
+            self.grasp_center_frame_id = self.model.getFrameId("grasp_center_link")
         else:
             self.grasp_center_frame_id = self.gripper_frame_id
             
         self.mode4_jids = self.trans_jids.copy()
-        for rot_name in ["joint_wrist_yaw", "joint_wrist_pitch"]:
+        for rot_name in ["wrist_yaw_joint", "wrist_pitch_joint"]:
             if self.model.existJointName(rot_name):
                 self.mode4_jids.append(self.model.getJointId(rot_name))
         
-        if self.model.existFrame("link_wrist"):
-            self.wrist_frame_id = self.model.getFrameId("link_wrist")
+        if self.model.existFrame("wrist_link"):
+            self.wrist_frame_id = self.model.getFrameId("wrist_link")
         else:
             self.wrist_frame_id = self.gripper_frame_id
         
@@ -142,7 +143,7 @@ class KinematicController:
             else:
                 self.retract_state['is_retracting'] = False
                 
-            # 3. Extended Yaw Target Compensation (strictly at link_wrist origin)
+            # 3. Extended Yaw Target Compensation (strictly at wrist_link origin)
             v_comp_5dof = np.zeros(5)
             if base_yaw_velocity != 0.0:
                 J_wrist = pin.computeFrameJacobian(self.model, self.data, self.q, self.wrist_frame_id, pin.LOCAL_WORLD_ALIGNED)[:3, :]
@@ -194,8 +195,8 @@ class KinematicController:
                 
             # 6. Wrist Yaw Orientation Compensation
             v_theta = v_5dof[2] 
-            if v_theta != 0.0 and self.model.existJointName("joint_wrist_yaw"):
-                wrist_yaw_id = self.model.getJointId("joint_wrist_yaw")
+            if v_theta != 0.0 and self.model.existJointName("wrist_yaw_joint"):
+                wrist_yaw_id = self.model.getJointId("wrist_yaw_joint")
                 idx_v_yaw = self.model.joints[wrist_yaw_id].idx_v
                 v[idx_v_yaw] -= v_theta
                 
@@ -213,7 +214,7 @@ class KinematicController:
                     upper = self.model.upperPositionLimit[idx_q]
                     
                     if control_mode == 4:
-                        if self.model.names[j_id] == "joint_arm_l0":
+                        if self.model.names[j_id] == "arm_l4_joint":
                             upper = min(upper, self.mode4_max_arm_extension)
 
                     self.q[idx_q] = np.clip(self.q[idx_q], lower, upper)
