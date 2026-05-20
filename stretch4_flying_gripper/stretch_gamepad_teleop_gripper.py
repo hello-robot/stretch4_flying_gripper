@@ -65,9 +65,7 @@ def main():
             if not args.direct:
                 robot.pull_status()
                 
-            # Sync IK configuration with real robot
-            pitch_sign_mult = 1.0 if args.disable_flipped_wrist else -1.0
-            roll_sign_mult = -1.0 if args.disable_flipped_wrist else 1.0
+            pitch_sign_mult = -1.0 # Flip the pitch so that moving up on the controller moves the pitch up in right-handed config
             
             ikin.q[0] = robot.base.status['x']
             ikin.q[1] = robot.base.status['y']
@@ -125,7 +123,7 @@ def main():
                     v_vel[4] = cmd['v_desired'][0] * gamepad_speed_trans * speed_multiplier
                     
                     # Wrist Roll (Left Stick X)
-                    v_vel[7] = cmd['v_desired'][1] * gamepad_speed_rot * speed_multiplier * roll_sign_mult * -1
+                    v_vel[7] = cmd['v_desired'][1] * gamepad_speed_rot * speed_multiplier * -1
                     
                     # Wrist Pitch (Right Stick Y)
                     v_vel[6] = cmd['rot_change'][1] * gamepad_speed_rot * speed_multiplier * pitch_sign_mult * -1
@@ -173,7 +171,7 @@ def main():
                 
                 robot.end_of_arm.move_by('wrist_yaw', v[5] * lookahead, v_yaw_cmd, accel_yaw * 0.5)
                 robot.end_of_arm.move_by('wrist_pitch', v[6] * pitch_sign_mult * lookahead, v_pitch_cmd, accel_pitch * 0.5)
-                robot.end_of_arm.move_by('wrist_roll', v[7] * roll_sign_mult * lookahead, v_roll_cmd, accel_roll * 0.5)
+                robot.end_of_arm.move_by('wrist_roll', v[7] * lookahead, v_roll_cmd, accel_roll * 0.5)
             else:
                 robot.base.set_velocity(0, 0, 0, accel_base_xy*2, accel_base_w*2)
                 robot.lift.set_velocity(0, a_m=accel_lift)

@@ -28,7 +28,6 @@ def get_base_parser(description):
     default_urdf = _get_base_planar_ik_urdf_file()
     parser.add_argument("--urdf", type=str, default=default_urdf, help="Path to URDF file")
     parser.add_argument("--disable_extended_yaw", action="store_true", help="Disable rotating mobile base to extend wrist yaw range")
-    parser.add_argument("--disable_flipped_wrist", action="store_true", help="Disable the flipped mode. The flipped mode is required for use with Calder and Dali when using the default specialized IK URDF derived from a Calder URDF (./urdfs/calder_ik.urdf).")
     parser.add_argument("--arm_blend_margin_extension", type=float, default=0.20, help="Margin range (meters) to seamlessly blend Cartesian movements from telescoping arm to mobile base as it approaches full extension.")
     parser.add_argument("--arm_blend_power_extension", type=float, default=2.0, help="Non-linear exponent to curve the blending penalty during arm extension (e.g. 1.0 is linear, 2.0 is quadratic onset).")
     parser.add_argument("--arm_blend_margin_retraction", type=float, default=0.05, help="Margin range (meters) to seamlessly blend Cartesian movements from telescoping arm to mobile base as it approaches full retraction.")
