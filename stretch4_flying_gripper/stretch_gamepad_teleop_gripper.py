@@ -53,8 +53,9 @@ def main():
     print("====================================")
     print("Gripper-Centric Teleop Started")
     print("Press Top Button (Y) to Toggle Modes")
-    print("Mode 1: Gripper Frame Relative")
-    print("Mode 2: Projected Base Frame Relative")
+    print("Mode 1: Gripper Frame Relative (IK)")
+    print("Mode 2: Projected Base Frame Relative (IK)")
+    print("Mode 3: Joint-Space Direct Control")
     print("Ctrl+C to Quit")
     print("====================================")
 
