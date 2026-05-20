@@ -6,9 +6,9 @@ import numpy as np
 import coal # Do not remove this import, it helps pin import correctly on some systems
 import pinocchio as pin
 
-from gamepad_mapper import GamepadMapper
+from stretch4_flying_gripper.gamepad_mapper import GamepadMapper
 # Kinematic resolution handled dynamically in teleop_config.py
-import teleop_config
+import stretch4_flying_gripper.teleop_config as teleop_config
 
 def main():
     parser = teleop_config.get_base_parser('Gripper-centric Teleop for Stretch')

@@ -9,8 +9,8 @@ from stretch4_body.core.robot_params import RobotParams
 from stretch4_body.utils.file_access_utils import setup_shared_directory
 from stretch4_urdf import generate_ik_urdfs, generate_robot_from_base_xacro
 
-from check_kinematic_chain import check_kinematic_chain
-from kinematic_controller import KinematicController
+from stretch4_flying_gripper.check_kinematic_chain import check_kinematic_chain
+from stretch4_flying_gripper.kinematic_controller import KinematicController
 
 def _get_base_planar_ik_urdf_file():
     tmp_gamepad_folder = "/tmp/stretch_gamepad_teleop"
