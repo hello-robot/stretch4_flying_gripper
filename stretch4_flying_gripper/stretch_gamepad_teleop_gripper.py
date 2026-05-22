@@ -46,6 +46,8 @@ def main():
     hz = 30.0
     dt = 1.0 / hz
     rate = time.time()
+    last_pushed_was_zero = False
+
     
     gripper_close_pct = -60.0
     gripper_open_pct = 60.0
@@ -82,14 +84,17 @@ def main():
             pin.updateFramePlacements(ikin.model, ikin.data)
             
             if not cmd:
-                robot.base.set_velocity(0, 0, 0, accel_base_xy*2, accel_base_w*2)
-                robot.lift.set_velocity(0, a_m=accel_lift)
-                robot.arm.set_velocity(0, a_m=accel_arm)
-                robot.end_of_arm.move_by('wrist_yaw', 0)
-                robot.end_of_arm.move_by('wrist_pitch', 0)
-                robot.end_of_arm.move_by('wrist_roll', 0)
-                robot.push_command()
+                if not last_pushed_was_zero:
+                    robot.base.set_velocity(0, 0, 0, accel_base_xy*2, accel_base_w*2)
+                    robot.lift.set_velocity(0, a_m=accel_lift)
+                    robot.arm.set_velocity(0, a_m=accel_arm)
+                    robot.end_of_arm.move_by('wrist_yaw', 0)
+                    robot.end_of_arm.move_by('wrist_pitch', 0)
+                    robot.end_of_arm.move_by('wrist_roll', 0)
+                    robot.push_command()
+                    last_pushed_was_zero = True
                 time.sleep(dt)
+            
                 continue
             
             if cmd['toggle']:
@@ -181,7 +186,13 @@ def main():
                 robot.end_of_arm.move_by('wrist_pitch', 0)
                 robot.end_of_arm.move_by('wrist_roll', 0)
                 
-            robot.push_command()
+            is_active = np.any(v != 0) or (cmd['grip'] is not None)
+            if is_active:
+                robot.push_command(priority=1)
+                last_pushed_was_zero = False
+            elif not last_pushed_was_zero:
+                robot.push_command(priority=1)
+                last_pushed_was_zero = True
             
             # Use dynamic sleep to maintain loop frequency
             sleep_time = rate + dt - time.time()
