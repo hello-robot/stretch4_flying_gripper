@@ -7,17 +7,16 @@ import stretch4_body.robot.robot_client as rc
 import stretch4_body.robot.robot as rb
 from stretch4_body.core.robot_params import RobotParams
 from stretch4_body.utils.file_access_utils import setup_shared_directory
-from stretch4_urdf import generate_ik_urdfs, generate_robot_from_base_xacro
+from stretch4_urdf import generate_robot_from_base_xacro, make_planar_ik_urdf
 
 from stretch4_flying_gripper.check_kinematic_chain import check_kinematic_chain
 from stretch4_flying_gripper.kinematic_controller import KinematicController
 
-def _get_base_planar_ik_urdf_file():
+def get_base_planar_ik_urdf_file():
     tmp_gamepad_folder = "/tmp/stretch_gamepad_teleop"
     setup_shared_directory(Path(tmp_gamepad_folder))
     robot = generate_robot_from_base_xacro()
-    urdf_paths = generate_ik_urdfs(robot, "gamepad_teleop", tmp_gamepad_folder)
-    urdf_path = [urdf_path for urdf_path in urdf_paths if "planar_ik" in urdf_path and not "fixed_wrist" in urdf_path][0]
+    urdf_path = make_planar_ik_urdf(robot, "gamepad_teleop", tmp_gamepad_folder, is_merge_arm=True, is_fixed_wrist=False)
     return urdf_path
     
 def get_base_parser(description):
@@ -25,7 +24,7 @@ def get_base_parser(description):
     parser.add_argument("--speed", choices=['low', 'medium', 'high', 'max'], default='medium', help="Speeds of the joints")
     parser.add_argument("--strength", choices=['low', 'medium', 'high'], default='medium', help="Strengths of the joints")
     parser.add_argument("-d", "--direct", action="store_true", help="Use direct API (no server)")
-    default_urdf = _get_base_planar_ik_urdf_file()
+    default_urdf = get_base_planar_ik_urdf_file()
     parser.add_argument("--urdf", type=str, default=default_urdf, help="Path to URDF file")
     parser.add_argument("--disable_extended_yaw", action="store_true", help="Disable rotating mobile base to extend wrist yaw range")
     parser.add_argument("--arm_blend_margin_extension", type=float, default=0.20, help="Margin range (meters) to seamlessly blend Cartesian movements from telescoping arm to mobile base as it approaches full extension.")
