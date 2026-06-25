@@ -1,5 +1,5 @@
 import time
-from standalone_gamepad import StandaloneGamePadController
+from stretch4_flying_gripper.standalone_gamepad import StandaloneGamePadController
 
 class GamepadMapper:
     def __init__(self):
