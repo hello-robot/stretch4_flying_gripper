@@ -69,11 +69,16 @@ def initialize_teleop_hardware(args, check_urdf_valid:bool = False):
     accel_vel_dict = {
         'accel_base_xy': params['omnibase']['motion'][motion_prof]['accel_xy_m'],
         'accel_base_w': params['omnibase']['motion'][motion_prof]['accel_w_r'],
-        'accel_lift': params['lift']['motion']['max']['accel_m'],
-        'accel_arm': params['arm']['motion']['max']['accel_m'],
+        'accel_lift': params['lift']['motion'][motion_prof]['accel_m'],
+        'accel_arm': params['arm']['motion'][motion_prof]['accel_m'],
         'accel_yaw': params['wrist_yaw']['motion'][motion_prof]['accel'],
         'accel_pitch': params['wrist_pitch']['motion'][motion_prof]['accel'],
         'accel_roll': params['wrist_roll']['motion'][motion_prof]['accel'],
+
+        'vel_base_xy': params['omnibase']['motion'][motion_prof]['vel_xy_m'],
+        'vel_base_w': params['omnibase']['motion'][motion_prof]['vel_w_r'],
+        'vel_lift': params['lift']['motion'][motion_prof]['vel_m'],
+        'vel_arm': params['arm']['motion'][motion_prof]['vel_m'],
         'vel_yaw': params['wrist_yaw']['motion'][motion_prof]['vel'],
         'vel_pitch': params['wrist_pitch']['motion'][motion_prof]['vel'],
         'vel_roll': params['wrist_roll']['motion'][motion_prof]['vel'],
