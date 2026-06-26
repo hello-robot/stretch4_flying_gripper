@@ -35,6 +35,7 @@ def get_base_parser(description):
     parser.add_argument("--retraction_ratio", type=float, default=0.25, help="Ratio of retraction speed relative to forward base speed for retract-at-extension mode (e.g. 0.25).")
     parser.add_argument("--retract_target_extension", type=float, default=0.20, help="Target extension length (meters) to retract to during the retract-at-extension mode (e.g. 0.20).")
     parser.add_argument("--mode4_max_arm_extension", type=float, default=0.48, help="Maximum allowed extension (meters) for the telescoping arm when using Control Mode 4. Limits the reach to prevent over-extension or to maintain stability.")
+    parser.add_argument("--use_system_speeds", action="store_true", default=False, help="Use the system speeds for the robot joints instead of the gamepad speeds.")
     return parser
 
 def initialize_teleop_hardware(args, check_urdf_valid:bool = False):
@@ -69,17 +70,23 @@ def initialize_teleop_hardware(args, check_urdf_valid:bool = False):
     accel_vel_dict = {
         'accel_base_xy': params['omnibase']['motion'][motion_prof]['accel_xy_m'],
         'accel_base_w': params['omnibase']['motion'][motion_prof]['accel_w_r'],
-        'accel_lift': params['lift']['motion']['max']['accel_m'],
-        'accel_arm': params['arm']['motion']['max']['accel_m'],
+        'accel_lift': params['lift']['motion'][motion_prof]['accel_m'],
+        'accel_arm': params['arm']['motion'][motion_prof]['accel_m'],
         'accel_yaw': params['wrist_yaw']['motion'][motion_prof]['accel'],
         'accel_pitch': params['wrist_pitch']['motion'][motion_prof]['accel'],
         'accel_roll': params['wrist_roll']['motion'][motion_prof]['accel'],
+
+        'vel_base_xy': params['omnibase']['motion'][motion_prof]['vel_xy_m'],
+        'vel_base_w': params['omnibase']['motion'][motion_prof]['vel_w_r'],
+        'vel_lift': params['lift']['motion'][motion_prof]['vel_m'],
+        'vel_arm': params['arm']['motion'][motion_prof]['vel_m'],
         'vel_yaw': params['wrist_yaw']['motion'][motion_prof]['vel'],
         'vel_pitch': params['wrist_pitch']['motion'][motion_prof]['vel'],
         'vel_roll': params['wrist_roll']['motion'][motion_prof]['vel'],
         'vel_grip': params['stretch_gripper']['motion'][motion_prof]['vel'],
         'acc_grip': params['stretch_gripper']['motion'][motion_prof]['accel']
     }
+    print(accel_vel_dict)
     
     if args.speed == 'low':
         accel_vel_dict['gamepad_speed_trans'] = 0.05
