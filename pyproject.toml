@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hello-robot-stretch4-flying-gripper"
 # Versioning follow CalVer (YYYY.MM.DD) for PEP 440 compliance
-version = "2026.06.25"
+version = "2026.07.02"
 description = "Inverse-kinematics (IK) based gamepad control of the Stretch 4 mobile manipulator's gripper"
 readme = "README.md"
 requires-python = ">=3.8"
