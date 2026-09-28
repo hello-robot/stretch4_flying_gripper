@@ -10,10 +10,10 @@ description = "Inverse-kinematics (IK) based gamepad control of the Stretch 4 mo
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
-    "numpy",
-    "coal",
-    "pin",
-    "yourdfpy"
+    "numpy>=2.0.0",
+    "coal==3.0.3",
+    "pin==4.1.0",
+    "yourdfpy>=0.0.60"
 ]
 
 [tool.setuptools.packages.find]
